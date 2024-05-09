@@ -12,27 +12,25 @@ async function fetchMoviesData() {
 async function buildGraph() {
   try {
     const movies = await fetchMoviesData();
-    const trees = [];
+    const tree = {};
 
     movies.forEach(movie => {
-      const root = { title: movie.title, actor: movie.cast[0], left: null, right: null };
-
-      movie.cast.slice(1).forEach(actor => {
-        insertActor(root, actor);
+      movie.cast.forEach(actor => {
+        if (!tree[actor]) {
+          tree[actor] = { actor, children: [] };
+        }
+        const actorNode = tree[actor];
+        actorNode.children.push(movie);
       });
-
-      trees.push(root);
     });
 
-    console.log('Árvores geradas:', trees); // Mostra no console a arvore
-
-    return trees;
+    console.log(tree);
+    return tree;
   } catch (error) {
-    console.error('Erro ao construir as árvores:', error);
-    return [];
+    console.error('Erro ao construir a árvore de filmes:', error);
+    return {};
   }
 }
-
 
 function insertActor(node, actor) {
   if (!node.left) {
@@ -58,32 +56,16 @@ async function findShortestPath() {
   }
 
   try {
-    const trees = await buildGraph();
-    let modalBodyContent = '';
-    
-    let sameTree = false;
-    let treeIndex = -1;
-    
-    trees.forEach((root, index) => {
-      if (findActor(root, actor1) && findActor(root, actor2)) {
-        sameTree = true;
-        treeIndex = index;
-      }
-    });
+    const tree = await buildGraph();
 
-    if (!sameTree) {
-      modalBodyContent = '<p>Os atores não estão no mesmo filme.</p>';
+    const pathExists = bfs(tree, actor1, actor2);
+    let modalBodyContent = '';
+
+    if (pathExists) {
+      const path = findPath(tree, actor1, actor2);
+      modalBodyContent = `<p>Caminho encontrado: ${path.join(' -> ')}</p>`;
     } else {
-      const paths = bfs(trees[treeIndex], actor1, actor2);
-      
-      if (paths.length > 0) {
-        modalBodyContent = '<p>Caminhos encontrados:</p>';
-        paths.forEach(path => {
-          modalBodyContent += `<p>${path.join(' -> ')}</p>`;
-        });
-      } else {
-        modalBodyContent = '<p>Não foi encontrado um caminho entre os atores selecionados.</p>';
-      }
+      modalBodyContent = '<p>Não foi encontrado um caminho entre os atores selecionados.</p>';
     }
 
     document.getElementById('result').innerHTML = modalBodyContent;
@@ -99,43 +81,106 @@ function findActor(node, actor) {
   return findActor(node.left, actor) || findActor(node.right, actor);
 }
 
-function bfs(root, startActor, endActor) {
-  const queue = [[root, [startActor], new Set([startActor])]]; 
-  const paths = [];
+
+function fecharModal() {
+  document.getElementById('myModal').style.display = 'none';
+}
+
+function bfs(tree, startActor, endActor) {
+  const queue = [];
+  const visited = new Set();
+
+  queue.push(startActor);
+  visited.add(startActor);
 
   while (queue.length > 0) {
-    const [node, path, visited] = queue.shift();
+    const currentActor = queue.shift();
 
-    if (node.actor === endActor) {
-      paths.push(path.slice());
-      continue; // Olha outros caminhos
+    if (currentActor === endActor) {
+      return true;
     }
 
-    console.log('path: ', path);
-    console.log('paths: ', paths);
-
-    // Verifica/adiciona o nó na fila
-    if (node.left && !visited.has(node.left.actor)) {
-      const newPath = [...path, node.left.actor];
-      const newVisited = new Set(visited); // Cria copia do conjunto de nos visitador(esquerda)
-      newVisited.add(node.left.actor);
-      queue.push([node.left, newPath, newVisited]);
+    const actorNode = tree[currentActor];
+    if (actorNode && actorNode.children) {
+      actorNode.children.forEach(movie => {
+        movie.cast.forEach(actor => {
+          if (!visited.has(actor)) {
+            queue.push(actor);
+            visited.add(actor);
+          }
+        });
+      });
     }
-
-    console.log('paths left: ', paths);
-
-    if (node.right && !visited.has(node.right.actor)) {
-      const newPath = [...path, node.right.actor];
-      const newVisited = new Set(visited); // Cria copia dos nos visitados(direita)
-      newVisited.add(node.right.actor);
-      queue.push([node.right, newPath, newVisited]);
-    }
-
-    console.log('path right: ', path);
   }
 
-  console.log(paths);
+  return false;
+}
 
+function findPath(tree, startActor, endActor) {
+  const queue = [];
+  const visited = new Set();
+  const parent = {};
+
+  queue.push(startActor);
+  visited.add(startActor);
+
+  while (queue.length > 0) {
+    const currentActor = queue.shift();
+
+    if (currentActor === endActor) {
+      const path = [];
+      let node = currentActor;
+      while (node !== startActor) {
+        path.unshift(node);
+        node = parent[node];
+      }
+      path.unshift(startActor);
+      return path;
+    }
+
+    const actorNode = tree[currentActor];
+    if (actorNode && actorNode.children) {
+      actorNode.children.forEach(movie => {
+        movie.cast.forEach(actor => {
+          if (!visited.has(actor)) {
+            queue.push(actor);
+            visited.add(actor);
+            parent[actor] = currentActor;
+          }
+        });
+      });
+    }
+  }
+
+  return [];
+}
+
+function findPaths(tree, startActor, endActor, maxDepth) {
+  const paths = [];
+
+  function dfs(currentActor, path, depth) {
+    if (depth > maxDepth) {
+      return;
+    }
+
+    if (currentActor === endActor) {
+      paths.push([...path, currentActor]);
+      return;
+    }
+
+    const actorNode = tree[currentActor];
+    if (actorNode && actorNode.children) {
+      actorNode.children.forEach(movie => {
+        movie.cast.forEach(actor => {
+          if (!path.includes(actor)) {
+            dfs(actor, [...path, currentActor], depth + 1);
+          }
+        });
+      });
+    }
+  }
+
+  dfs(startActor, [], 0);
   return paths;
 }
 
@@ -149,41 +194,29 @@ async function findSixDegreesOfSeparation() {
   }
 
   try {
-    const trees = await buildGraph();
+    const tree = await buildGraph();
     let modalBodyContent = '';
 
-    let sameTree = false;
-    let treeIndex = -1;
-    
-    trees.forEach((root, index) => {
-      if (findActor(root, actor1) && findActor(root, actor2)) {
-        sameTree = true;
-        treeIndex = index;
-      }
-    });
-
-    if (!sameTree) {
-      modalBodyContent = '<p>Os atores não estão no mesmo filme.</p>';
+    if (!tree[actor1] || !tree[actor2]) {
+      modalBodyContent = '<p>Um ou ambos os atores não foram encontrados no arquivo JSON.</p>';
     } else {
-      const paths = bfs(trees[treeIndex], actor1, actor2);
-      
+      console.log(tree, actor1, actor2);
+      const paths = findPaths(tree, actor1, actor2, 6); 
+      console.log(paths);
+
       if (paths.length > 0) {
         modalBodyContent = '<p>Caminhos encontrados:</p>';
-        paths.slice(0, 6).forEach(path => { // limita 6 caminhos
+        paths.forEach(path => {
           modalBodyContent += `<p>${path.join(' -> ')}</p>`;
         });
       } else {
-        modalBodyContent = '<p>Não foi encontrado um caminho entre os atores selecionados.</p>';
+        modalBodyContent = '<p>Não foi encontrado um caminho entre os atores selecionados com no máximo 6 atores.</p>';
       }
     }
 
     document.getElementById('result').innerHTML = modalBodyContent;
     document.getElementById('myModal').style.display = 'block';
   } catch (error) {
-    console.error('Erro ao encontrar o caminho mínimo:', error);
+    console.error('Erro ao encontrar os caminhos:', error);
   }
-}
-
-function fecharModal() {
-  document.getElementById('myModal').style.display = 'none';
 }

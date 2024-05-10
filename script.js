@@ -35,7 +35,6 @@ async function buildGraph() {
 async function findShortestPath() {
   const actor1 = document.getElementById('actor1').value.trim();
   const actor2 = document.getElementById('actor2').value.trim();
-  const maxDepth = null;
 
   if (actor1 === '' || actor2 === '') {
     alert('Por favor, insira o nome do ator de origem e do ator de destino.');
@@ -45,7 +44,7 @@ async function findShortestPath() {
   try {
     const tree = await buildGraph();
 
-    const path = findPath(tree, actor1, actor2, maxDepth);
+    const path = findPath(tree, actor1, actor2);
     let modalBodyContent = '';
 
     if (path.length > 0) {
@@ -57,14 +56,12 @@ async function findShortestPath() {
     document.getElementById('result').innerHTML = modalBodyContent;
     document.getElementById('myModal').style.display = 'block';
 
-    document.getElementById('actor1').value = '';
-    document.getElementById('actor2').value = '';
   } catch (error) {
     console.error('Erro ao encontrar o caminho mínimo:', error);
   }
 }
 
-function findPath(tree, startActor, endActor, maxDepth) {
+function findPath(tree, startActor, endActor) {
   const queue = [];
   const visited = new Set();
   const parent = {};
@@ -156,9 +153,7 @@ async function findSixDegreesOfSeparation() {
     if (!tree[actor1] || !tree[actor2]) {
       modalBodyContent = '<p>Um ou ambos os atores não foram encontrados.</p>';
     } else {
-      console.log(tree, actor1, actor2);
       const paths = findPaths(tree, actor1, actor2, 6);
-      console.log(paths);
 
       if (paths.length > 0) {
         modalBodyContent = '<p>Caminhos encontrados:</p>';
@@ -173,8 +168,6 @@ async function findSixDegreesOfSeparation() {
     document.getElementById('result').innerHTML = modalBodyContent;
     document.getElementById('myModal').style.display = 'block';
 
-    document.getElementById('actor1').value = '';
-    document.getElementById('actor2').value = '';
   } catch (error) {
     console.error('Erro ao encontrar os caminhos:', error);
   }

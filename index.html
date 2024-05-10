@@ -20,9 +20,9 @@
     </div>
   </nav>
 
-<div class="center">
-  <div class="bg_logo"></div>
-</div>
+  <div class="center">
+    <div class="bg_logo"></div>
+  </div>
 
   <div class="position-absolute top-50 start-50 translate-middle bg-light">
 
@@ -37,44 +37,46 @@
     </div>
 
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-      <button onclick="findShortestPath()" class="btn btn-primary me-md-2">Encontrar Caminho Mínimo</button>
-      <button onclick="findSixDegreesOfSeparation()" class="btn btn-primary">Relacionamentos com até 6 Graus de
+      <button onclick="findShortestPath()" class="btn btn-outline-primary me-md-2">Encontrar Caminho Mínimo</button>
+      <button onclick="findSixDegreesOfSeparation()" class="btn btn-outline-primary">Relacionamentos com até 6 Graus de
         Separação</button>
     </div>
   </div>
 
   </div>
 
-<div id="myModal" class="modal position-absolute top-50 start-50 translate-middle">
-  <div class="modal-dialog">
-    <div class="modal-content bg-light">
+  <div id="myModal" class="modal position-absolute top-50 start-50 translate-middle">
+    <div class="modal-dialog">
+      <div class="modal-content bg-light">
 
-      <div class="modal-header">
-        <h4 class="modal-title">Resultado</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="fecharModal()"></button>
-      </div>
+        <div class="modal-header">
+          <h4 class="modal-title">Resultado</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            onclick="fecharModal()"></button>
+        </div>
 
-      <div class="modal-body" id="result"></div>
+        <div class="modal-body" id="result"></div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-danger" data-dismiss="modal" onclick="fecharModal()">Fechar</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" data-dismiss="modal"
+            onclick="fecharModal()">Fechar</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
 
   <div class="container">
     <footer class="py-3 my-4">
       <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Pricing</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
+        <li class="nav-item"><a href="https://example.com/home" class="nav-link px-2 text-muted" target="_blank">Home</a></li>
+        <li class="nav-item"><a href="https://example.com/features" class="nav-link px-2 text-muted" target="_blank">Features</a></li>
+        <li class="nav-item"><a href="https://example.com/pricing" class="nav-link px-2 text-muted" target="_blank">Pricing</a></li>
+        <li class="nav-item"><a href="https://example.com/faqs" class="nav-link px-2 text-muted" target="_blank">FAQs</a></li>
+        <li class="nav-item"><a href="https://sobre.com" class="nav-link px-2 text-muted" target="_blank">About</a></li>
       </ul>
-      <p class="text-center text-muted">© 2024 Cristopher e Theo</p>
+      <p class="text-center text-muted">&copy; 2024 Cristopher e Theo</p>
     </footer>
   </div>
 
